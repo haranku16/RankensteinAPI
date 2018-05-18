@@ -8,7 +8,7 @@ plugins {
 dependencies {
     implementation 'com.google.guava:guava:23.0'
 
-    compileOnly 'org.projectlombok:lombok:1.16.20'
+    compile 'org.projectlombok:lombok:1.16.20'
     apt "org.projectlombok:lombok:1.16.20"
 
     testImplementation 'junit:junit:4.12'
