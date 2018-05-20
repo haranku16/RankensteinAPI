@@ -12,6 +12,6 @@ public class TransformerTest {
             System.out.println(s);
             return null;
         };
-        doubler.transform(2,addThree,toString,printer);
+        doubler.transform(2).andThen(addThree).andThen(toString).andThen(printer);
     }
 }
