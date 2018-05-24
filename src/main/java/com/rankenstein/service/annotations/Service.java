@@ -6,5 +6,5 @@ public @interface Service {
         POST
     }
     String path() default "";
-    Action action() default Action.POST;
+    Action action() default Action.GET;
 }
