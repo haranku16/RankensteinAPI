@@ -3,7 +3,7 @@
 ## Contributors
 >> Harankumar Nallasivan, *Backend Spring Application*
 
->> Benjamin Yan, *Front-End Android Application*
+>> Benjamin Yan, *Front-End React Native Application*
 
 >> Vamshikrishnan Balakrishnan
 
