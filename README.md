@@ -1,4 +1,4 @@
-# RankensteinServiceInterfaces
+# RankensteinAPI
 
 ## Contributors
 >> Harankumar Nallasivan, *Backend Spring Application*
