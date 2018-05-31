@@ -1,19 +1,19 @@
 # RankensteinServiceInterfaces
 
->> ##Contributors
+## Contributors
 >> Harankumar Nallasivan, *Backend Spring Application*
 
 >> Benjamin Yan, *Front-End Android Application*
 
 >> Vamshikrishnan Balakrishnan
 
-##Instructions
-###Testing
+## Instructions
+### Testing
 mvn test
-###Running the Server
+### Running the Server
 mvn spring-boot:run
 
-##APIs
+## APIs
 <table>
 <thead>
     <td>URI</td>
