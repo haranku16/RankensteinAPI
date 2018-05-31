@@ -36,7 +36,7 @@ mvn spring-boot:run
                     "status": 200,
                     "page": 1,
                     "seed": 1,
-                    "results": 1
+                    "size": 1
                 }
             }
         </pre>
@@ -47,7 +47,7 @@ mvn spring-boot:run
                 "status": 200,
                 "page": 1,
                 "seed": 1,
-                "results": 1
+                "size": 1
             }
         </pre>
     </td>
