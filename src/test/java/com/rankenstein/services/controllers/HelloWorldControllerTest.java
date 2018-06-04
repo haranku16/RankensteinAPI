@@ -3,9 +3,11 @@ package com.rankenstein.services.controllers;
 import com.rankenstein.services.response.Response;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.Assert.assertEquals;
 
+@SpringBootTest
 public class HelloWorldControllerTest extends HelloWorldController {
 
     private Response<String> response;
@@ -26,6 +28,5 @@ public class HelloWorldControllerTest extends HelloWorldController {
         assertEquals(1, metadata.getPage());
         assertEquals(1, metadata.getSeed());
         assertEquals(1, metadata.getSize());
-        assertEquals(200, metadata.getStatus());
     }
 }

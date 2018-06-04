@@ -11,8 +11,6 @@ public class Response<T> {
     @Builder
     public static class Metadata {
         @Builder.Default
-        private final int status = 200;
-        @Builder.Default
         private final int page = 1;
         @Builder.Default
         private final int seed = 1;
