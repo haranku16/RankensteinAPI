@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.rankenstein.services.exceptions.AlreadyLoggedInException;
 import com.rankenstein.services.exceptions.LoginValidationException;
 import com.rankenstein.services.exceptions.RegistrationValidationException;
+import com.rankenstein.services.exceptions.UserAlreadyExistsException;
 import com.rankenstein.services.formInput.LoginForm;
 import com.rankenstein.services.formInput.RegistrationForm;
 import com.rankenstein.services.models.User;
@@ -67,12 +68,15 @@ public class PublicUserController {
     }
 
     @RequestMapping(path="/register", method = RequestMethod.POST)
-    public void register(@Valid @RequestBody RegistrationForm registrationForm, BindingResult result) throws RegistrationValidationException, AlreadyLoggedInException {
+    public void register(@Valid @RequestBody RegistrationForm registrationForm, BindingResult result) throws RegistrationValidationException, AlreadyLoggedInException, UserAlreadyExistsException {
         if (result.hasErrors()) {
             throw new RegistrationValidationException();
         }
         if (SecurityUtils.getSubject().isAuthenticated()) {
             throw new AlreadyLoggedInException();
+        }
+        if (userRepository.findByUsername(registrationForm.getUsername()) != null) {
+            throw new UserAlreadyExistsException();
         }
         ByteSource passwordSalt = randomNumberGenerator.nextBytes();
         String hashedPasswordBase64 = new Sha512Hash(registrationForm.getPassword(), passwordSalt, HASHING_ITERATIONS).toBase64();
@@ -112,5 +116,10 @@ public class PublicUserController {
     @ResponseStatus(value = HttpStatus.FORBIDDEN, reason = "UNAUTHORIZED")
     @ExceptionHandler(UnauthorizedException.class)
     public void unauthorized() {
+    }
+
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "USER_EXISTS")
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public void userAlreadyExists() {
     }
 }
