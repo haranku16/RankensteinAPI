@@ -78,6 +78,7 @@ Make sure the MongoDB daemon is running.
             }    
         </pre>
     </td>
+    <td>
         <pre>
             {
                 "username": "thomas",
@@ -88,6 +89,7 @@ Make sure the MongoDB daemon is running.
                 "phoneNumber": "+1 555-555-5555"
             }
         </pre>
+    </td>
     <td>
         Unauthenticated
     </td>
@@ -107,12 +109,14 @@ Make sure the MongoDB daemon is running.
             }    
         </pre>
     </td>
+    <td>
         <pre>
             {
                 "username": "thomas",
                 "password": "password"
             }
         </pre>
+    </td>
     <td>
         Unauthenticated
     </td>
