@@ -177,7 +177,7 @@ Make sure the MongoDB daemon is running.
         nickname
     </td>
     <td>
-        <p>/api/user/set-name?nickname=Neo</p>
+        <p>/api/user/set-nickname?nickname=Neo</p>
     </td>
     <td>
         Authenticated
