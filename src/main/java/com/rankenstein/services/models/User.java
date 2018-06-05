@@ -1,19 +1,24 @@
 package com.rankenstein.services.models;
 
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.util.Date;
 import java.util.Set;
 
-@Getter
-@Builder
-@AllArgsConstructor
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@Data
+@Document
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class User {
+    public static final long TTL = 1000L*60*60*24*365;
+
     @Id
     String id;
     String username;
@@ -25,4 +30,15 @@ public class User {
     String phoneNumber;
     Set<String> roles;
     Set<String> permissions;
+
+    @Field
+    @Indexed(name = "expirationDateIndex", expireAfterSeconds = 0)
+    Date expirationDate;
+
+    @Version
+    Long version;
+
+    public void updateExpirationDate() {
+        expirationDate.setTime(expirationDate.getTime() + TTL);
+    }
 }

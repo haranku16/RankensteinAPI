@@ -1,18 +1,17 @@
 package com.rankenstein.services.controllers;
 
 import com.google.common.collect.ImmutableSet;
-import com.rankenstein.services.exceptions.AlreadyLoggedInException;
-import com.rankenstein.services.exceptions.LoginValidationException;
-import com.rankenstein.services.exceptions.RegistrationValidationException;
-import com.rankenstein.services.exceptions.UserAlreadyExistsException;
+import com.rankenstein.services.exceptions.*;
 import com.rankenstein.services.formInput.LoginForm;
 import com.rankenstein.services.formInput.RegistrationForm;
+import com.rankenstein.services.models.UnconfirmedUser;
 import com.rankenstein.services.models.User;
 import com.rankenstein.services.repositories.UserRepository;
 import lombok.AccessLevel;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -26,6 +25,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Date;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.rankenstein.services.shiro.ShiroSpringConfig.HASHING_ITERATIONS;
@@ -53,6 +54,7 @@ public class PublicUserController {
             UsernamePasswordToken token = new UsernamePasswordToken(loginForm.getUsername(), loginForm.getPassword());
             token.setRememberMe(true);
             subject.login(token);
+            subject.getSession().setAttribute("username", loginForm.getUsername());
         } else {
             throw new AlreadyLoggedInException();
         }
@@ -80,17 +82,45 @@ public class PublicUserController {
         }
         ByteSource passwordSalt = randomNumberGenerator.nextBytes();
         String hashedPasswordBase64 = new Sha512Hash(registrationForm.getPassword(), passwordSalt, HASHING_ITERATIONS).toBase64();
-        User user = User.builder().username(registrationForm.getUsername())
-                .passwordSalt(passwordSalt.toBase64())
-                .hashedPasswordBase64(hashedPasswordBase64)
-                .name(registrationForm.getName())
-                .nickname(registrationForm.getNickname())
-                .email(registrationForm.getEmail())
-                .phoneNumber(registrationForm.getPhoneNumber())
-                .roles(userRoles)
-                .permissions(userPermissions)
-                .build();
+        UnconfirmedUser user = new UnconfirmedUser();
+        user.setUsername(registrationForm.getUsername());
+        user.setPasswordSalt(passwordSalt.toBase64());
+        user.setHashedPasswordBase64(hashedPasswordBase64);
+        user.setPhoneNumber(registrationForm.getPhoneNumber());
+        user.setConfirmationCode("2018");
+        user.setExpirationDate(new Date() {{
+            setTime(getTime()+UnconfirmedUser.TTL);
+        }});
         userRepository.save(user);
+    }
+
+    @RequestMapping(path="/confirmation", method = RequestMethod.POST)
+    public void confirmation(@RequestParam(name="username") String username,
+                             @RequestParam(name="confirmationCode") String confirmationCode) throws IncorrectConfirmationCodeException, AlreadyLoggedInException {
+        if (SecurityUtils.getSubject().isAuthenticated()) {
+            throw new AlreadyLoggedInException();
+        }
+        Optional.ofNullable(username)
+                .map(userRepository::findByUsername)
+                .filter(user -> user instanceof UnconfirmedUser)
+                .map(user -> (UnconfirmedUser) user)
+                .filter(user -> user.getConfirmationCode().equals(confirmationCode))
+                .map(user -> {
+                        User newUser = new User();
+                        newUser.setId(user.getId());
+                        newUser.setUsername(user.getUsername());
+                        newUser.setPasswordSalt(user.getPasswordSalt());
+                        newUser.setHashedPasswordBase64(user.getHashedPasswordBase64());
+                        newUser.setPhoneNumber(user.getPhoneNumber());
+                        newUser.setPermissions(userPermissions);
+                        newUser.setRoles(userRoles);
+                        newUser.setVersion(user.getVersion());
+                        newUser.setExpirationDate(user.getExpirationDate());
+                        newUser.updateExpirationDate();
+                        return newUser;
+                    })
+                .map(userRepository::save)
+                .orElseThrow(() -> new IncorrectCredentialsException());
     }
 
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
@@ -121,5 +151,10 @@ public class PublicUserController {
     @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "USER_EXISTS")
     @ExceptionHandler(UserAlreadyExistsException.class)
     public void userAlreadyExists() {
+    }
+
+    @ResponseStatus(value = HttpStatus.UNAUTHORIZED, reason = "INCORRECT_CODE")
+    @ExceptionHandler(IncorrectConfirmationCodeException.class)
+    public void incorrectConfirmationCode() {
     }
 }
