@@ -71,9 +71,6 @@ Make sure the MongoDB daemon is running.
             {
                 "username": "String", // at least 5 characters long, starting with an alphabetical character, all alphanumeric
                 "password": "String", // at least 8 characters long, a-z, A-Z, 0-9, ~, !, @, #, $, %, ^, &, or *
-                "name": "String", // not empty
-                "nickname": "String", // optional
-                "email": "String", // valid email address shape
                 "phoneNumber": "String" // valid phone number shape
             }    
         </pre>
@@ -81,11 +78,8 @@ Make sure the MongoDB daemon is running.
     <td>
         <pre>
             {
-                "username": "thomas",
+                "username": "neo123",
                 "password": "password",
-                "name": "Thomas Anderson",
-                "nickname": "Neo",
-                "email": "neo@mail.com",
                 "phoneNumber": "+1 555-555-5555"
             }
         </pre>
@@ -112,7 +106,7 @@ Make sure the MongoDB daemon is running.
     <td>
         <pre>
             {
-                "username": "thomas",
+                "username": "neo123",
                 "password": "password"
             }
         </pre>
@@ -133,6 +127,57 @@ Make sure the MongoDB daemon is running.
     </td>
     <td>
         N/A
+    </td>
+    <td>
+        Authenticated
+    </td>
+</tr>
+<tr>
+    <td>
+        /api/public/confirmation
+    </td>
+    <td>
+        POST
+    </td>
+    <td>
+        username, confirmationCode
+    </td>
+    <td>
+        <p>/api/public/confirmation?username=neo123&confirmationCode=2018</p>
+    </td>
+    <td>
+        Unauthenticated
+    </td>
+</tr>
+<tr>
+    <td>
+        /api/user/set-name
+    </td>
+    <td>
+        POST
+    </td>
+    <td>
+        name
+    </td>
+    <td>
+        <p>/api/user/set-name?name=Thomas%20Anderson</p>
+    </td>
+    <td>
+        Authenticated
+    </td>
+</tr>
+<tr>
+    <td>
+        /api/user/set-nickname
+    </td>
+    <td>
+        POST
+    </td>
+    <td>
+        nickname
+    </td>
+    <td>
+        <p>/api/user/set-nickname?nickname=Neo</p>
     </td>
     <td>
         Authenticated
