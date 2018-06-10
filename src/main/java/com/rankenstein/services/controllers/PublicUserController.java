@@ -2,6 +2,7 @@ package com.rankenstein.services.controllers;
 
 import com.google.common.collect.ImmutableSet;
 import com.rankenstein.services.exceptions.*;
+import com.rankenstein.services.formInput.ConfirmationForm;
 import com.rankenstein.services.formInput.LoginForm;
 import com.rankenstein.services.formInput.RegistrationForm;
 import com.rankenstein.services.models.UnconfirmedUser;
@@ -24,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.naming.Binding;
 import javax.validation.Valid;
 import java.util.Date;
 import java.util.Optional;
@@ -88,6 +90,7 @@ public class PublicUserController {
         user.setHashedPasswordBase64(hashedPasswordBase64);
         user.setPhoneNumber(registrationForm.getPhoneNumber());
         user.setConfirmationCode("2018");
+        user.setAttemptsLeft(User.BASE_ATTEMPTS_LEFT_FOR_CONFIRMATION);
         user.setExpirationDate(new Date() {{
             setTime(getTime()+UnconfirmedUser.TTL);
         }});
@@ -95,11 +98,12 @@ public class PublicUserController {
     }
 
     @RequestMapping(path="/confirmation", method = RequestMethod.POST)
-    public void confirmation(@RequestParam(name="username") String username,
-                             @RequestParam(name="confirmationCode") String confirmationCode) throws IncorrectConfirmationCodeException, AlreadyLoggedInException {
+    public void confirmation(@RequestBody ConfirmationForm confirmationForm) throws IncorrectConfirmationCodeException, AlreadyLoggedInException {
         if (SecurityUtils.getSubject().isAuthenticated()) {
             throw new AlreadyLoggedInException();
         }
+        String username = confirmationForm.getUsername();
+        String confirmationCode = confirmationForm.getConfirmationCode();
         Optional.ofNullable(username)
                 .map(userRepository::findByUsername)
                 .filter(user -> user instanceof UnconfirmedUser)
@@ -117,10 +121,11 @@ public class PublicUserController {
                         newUser.setVersion(user.getVersion());
                         newUser.setExpirationDate(user.getExpirationDate());
                         newUser.updateExpirationDate();
+                        newUser.setAttemptsLeft(User.BASE_ATTEMPTS_LEFT_FOR_LOGIN);
                         return newUser;
                     })
                 .map(userRepository::save)
-                .orElseThrow(() -> new IncorrectCredentialsException());
+                .orElseThrow(() -> new IncorrectConfirmationCodeException(username));
     }
 
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
@@ -155,6 +160,16 @@ public class PublicUserController {
 
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED, reason = "INCORRECT_CODE")
     @ExceptionHandler(IncorrectConfirmationCodeException.class)
-    public void incorrectConfirmationCode() {
+    public void incorrectConfirmationCode(IncorrectConfirmationCodeException e) {
+        String username = e.getUsername();
+        User user = Optional.ofNullable(username).map(userRepository::findByUsername).orElse(null);
+        if (user != null && user instanceof UnconfirmedUser) {
+            user.setAttemptsLeft(user.getAttemptsLeft() - 1);
+            if (user.getAttemptsLeft() == 0) {
+                userRepository.delete(user);
+            } else {
+                userRepository.save(user);
+            }
+        }
     }
 }

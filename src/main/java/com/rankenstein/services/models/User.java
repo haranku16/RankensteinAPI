@@ -18,18 +18,19 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class User {
     public static final long TTL = 1000L*60*60*24*365;
+    public static final int BASE_ATTEMPTS_LEFT_FOR_LOGIN = 5;
+    public static final int BASE_ATTEMPTS_LEFT_FOR_CONFIRMATION = 3;
 
     @Id
     String id;
     String username;
     String hashedPasswordBase64;
     String passwordSalt;
-    String name;
-    String nickname;
     String email;
     String phoneNumber;
     Set<String> roles;
     Set<String> permissions;
+    int attemptsLeft;
 
     @Field
     @Indexed(name = "expirationDateIndex", expireAfterSeconds = 0)
