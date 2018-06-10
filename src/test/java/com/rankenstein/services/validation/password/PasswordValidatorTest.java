@@ -15,7 +15,7 @@ public class PasswordValidatorTest extends PasswordValidator implements SimpleCo
     public String[] getValidTestCases() {
         return new String[] {
             /* contains all valid characters */
-            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*~",
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*~-_=+",
             "blahblah"
         };
     }
