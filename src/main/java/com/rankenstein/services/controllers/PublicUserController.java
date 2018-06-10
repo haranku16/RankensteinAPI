@@ -98,9 +98,12 @@ public class PublicUserController {
     }
 
     @RequestMapping(path="/confirmation", method = RequestMethod.POST)
-    public void confirmation(@RequestBody ConfirmationForm confirmationForm) throws IncorrectConfirmationCodeException, AlreadyLoggedInException {
+    public void confirmation(@Valid @RequestBody ConfirmationForm confirmationForm, BindingResult result) throws IncorrectConfirmationCodeException, AlreadyLoggedInException, ConfirmationCodeValidationException {
         if (SecurityUtils.getSubject().isAuthenticated()) {
             throw new AlreadyLoggedInException();
+        }
+        if (result.hasErrors()) {
+            throw new ConfirmationCodeValidationException();
         }
         String username = confirmationForm.getUsername();
         String confirmationCode = confirmationForm.getConfirmationCode();
@@ -128,12 +131,12 @@ public class PublicUserController {
                 .orElseThrow(() -> new IncorrectConfirmationCodeException(username));
     }
 
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "Malformed registration request")
     @ExceptionHandler(RegistrationValidationException.class)
-    public void registrationConstraintViolations() {
+    public void registrationConstraintViolation() {
     }
 
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "Malformed login request")
     @ExceptionHandler(LoginValidationException.class)
     public void loginConstraintViolation() {
     }
@@ -171,5 +174,10 @@ public class PublicUserController {
                 userRepository.save(user);
             }
         }
+    }
+
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "Malformed confirmation request")
+    @ExceptionHandler(ConfirmationCodeValidationException.class)
+    public void confirmationCodeConstraintViolation() {
     }
 }
