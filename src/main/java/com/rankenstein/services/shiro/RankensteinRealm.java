@@ -1,5 +1,6 @@
 package com.rankenstein.services.shiro;
 
+import com.rankenstein.services.models.UnconfirmedUser;
 import com.rankenstein.services.models.User;
 import com.rankenstein.services.repositories.UserRepository;
 import lombok.AccessLevel;
@@ -56,6 +57,10 @@ public class RankensteinRealm extends AuthorizingRealm {
         User user = userRepository.findByUsername(username);
         if (user == null) {
             throw new AuthenticationException("User " + username + " not found");
+        } else if (user instanceof UnconfirmedUser) {
+            throw new AuthenticationException("User " + username + " has not yet been confirmed");
+        } else if (user.getAttemptsLeft() == 0) {
+            throw new AuthenticationException("User " + username + " is locked");
         }
         SimplePrincipalCollection simplePrincipalCollection = new SimplePrincipalCollection();
         simplePrincipalCollection.add(user.getId(), getName());
@@ -63,9 +68,14 @@ public class RankensteinRealm extends AuthorizingRealm {
                                                                 user.getHashedPasswordBase64(),
                                                                 ByteSource.Util.bytes(Base64.decode(user.getPasswordSalt())),
                                                                 getName());
-        /*if (!getCredentialsMatcher().doCredentialsMatch(token, simpleAuthenticationInfo)) {
-            throw new AuthenticationException("User " + username + " does not have that password");
-        }*/
+        if (!getCredentialsMatcher().doCredentialsMatch(token, simpleAuthenticationInfo)) {
+            user.setAttemptsLeft(user.getAttemptsLeft() - 1);
+            userRepository.save(user);
+            throw new IncorrectCredentialsException();
+        } else {
+            user.setAttemptsLeft(User.BASE_ATTEMPTS_LEFT_FOR_LOGIN);
+            userRepository.save(user);
+        }
         return simpleAuthenticationInfo;
     }
 

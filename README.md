@@ -3,6 +3,8 @@
 ## Contributors
 >> Harankumar Nallasivan, *Backend Spring Application*
 
+>> Ramaseshan Parthasarathy, *Backend Spring Application*
+
 >> Benjamin Yan, *Front-End React Native Application*
 
 ## Instructions
@@ -140,47 +142,19 @@ Make sure the MongoDB daemon is running.
         POST
     </td>
     <td>
-        username, confirmationCode
+        {
+            "username": "String",
+            "confirmationCode": "String"
+        }
     </td>
     <td>
-        <p>/api/public/confirmation?username=neo123&confirmationCode=2018</p>
+        {
+            "username": "neo123",
+            "confirmationCode": "2018"
+        }
     </td>
     <td>
         Unauthenticated
-    </td>
-</tr>
-<tr>
-    <td>
-        /api/user/set-name
-    </td>
-    <td>
-        POST
-    </td>
-    <td>
-        name
-    </td>
-    <td>
-        <p>/api/user/set-name?name=Thomas%20Anderson</p>
-    </td>
-    <td>
-        Authenticated
-    </td>
-</tr>
-<tr>
-    <td>
-        /api/user/set-nickname
-    </td>
-    <td>
-        POST
-    </td>
-    <td>
-        nickname
-    </td>
-    <td>
-        <p>/api/user/set-nickname?nickname=Neo</p>
-    </td>
-    <td>
-        Authenticated
     </td>
 </tr>
 </tbody>

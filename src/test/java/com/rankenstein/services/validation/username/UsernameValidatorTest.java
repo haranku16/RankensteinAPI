@@ -16,7 +16,8 @@ public class UsernameValidatorTest extends UsernameValidator implements SimpleCo
         return new String[]{
             "blsfdsafd",
             "bwer234",
-            "Zdfsdf32"
+            "Zdfsdf32",
+            "_valid_number_of_underscores"
         };
     }
 
@@ -25,7 +26,8 @@ public class UsernameValidatorTest extends UsernameValidator implements SimpleCo
         return new String[]{
             "123sfsd",
             "sdf",
-            "dsafsa#@!"
+            "dsafsa#@!",
+            "__too_many_underscores_in___a_row"
         };
     }
 }
